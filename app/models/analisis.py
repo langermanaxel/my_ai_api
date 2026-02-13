@@ -1,7 +1,7 @@
 import uuid
 import enum
 from datetime import datetime
-from sqlalchemy import Column, String, DateTime, Enum, ForeignKey, Text
+from sqlalchemy import Column, String, DateTime, Enum, ForeignKey, Text, Float, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.base import Base
@@ -20,15 +20,42 @@ class Analisis(Base):
     fecha_solicitud = Column(DateTime, default=datetime.utcnow)
     estado = Column(Enum(EstadoAnalisis), default=EstadoAnalisis.PENDIENTE)
     
-    # Relación
+    # Relaciones
+    # uselist=False indica que es una relación 1 a 1
     snapshot = relationship("SnapshotRecibido", back_populates="analisis", uselist=False)
+    resultado = relationship("ResultadoAnalisis", back_populates="analisis", uselist=False)
 
 class SnapshotRecibido(Base):
     __tablename__ = "snapshot_recibido"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     analisis_id = Column(UUID(as_uuid=True), ForeignKey("analisis.id"))
-    payload_completo = Column(Text) # Usamos Text para JSONs largos
+    payload_completo = Column(Text) 
     recibido_at = Column(DateTime, default=datetime.utcnow)
 
     analisis = relationship("Analisis", back_populates="snapshot")
+
+class ResultadoAnalisis(Base):
+    __tablename__ = "resultado_analisis"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    analisis_id = Column(UUID(as_uuid=True), ForeignKey("analisis.id"), unique=True)
+    resumen_general = Column(Text)
+    score_coherencia = Column(Float)
+    detecta_riesgos = Column(Boolean, default=False)
+    generado_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relaciones
+    analisis = relationship("Analisis", back_populates="resultado")
+    observaciones = relationship("ObservacionGenerada", back_populates="resultado")
+
+class ObservacionGenerada(Base):
+    __tablename__ = "observacion_generada"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    resultado_id = Column(UUID(as_uuid=True), ForeignKey("resultado_analisis.id"))
+    titulo = Column(String)
+    descripcion = Column(Text)
+    nivel = Column(String) # INFORMATIVO, ATENCION, CRITICO
+    
+    resultado = relationship("ResultadoAnalisis", back_populates="observaciones")
