@@ -1,40 +1,57 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
+import json
+
 from app.db.base import Base, engine, get_db
 from app.models.analisis import Analisis, SnapshotRecibido, EstadoAnalisis
 from app.schemas.snapshot import SnapshotCreate
-import json
+from app.services.llm_client import LLMClient
+from app.services.prompt_builder import PromptBuilder
 
-# Crear tablas en la DB (Esto evita usar Alembic por ahora)
+# Crear tablas en la DB
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AI Analisis API")
 
 @app.post("/analisis/iniciar")
-def iniciar_analisis(snapshot_in: SnapshotCreate, db: Session = Depends(get_db)):
-    # 1. Crear el Analisis
+async def iniciar_analisis(snapshot_in: SnapshotCreate, db: Session = Depends(get_db)):
+    # 1. Guardar en Base de Datos (Inmutabilidad)
     nuevo_analisis = Analisis(
         proyecto_codigo=snapshot_in.proyecto_codigo,
-        estado=EstadoAnalisis.PENDIENTE
+        estado=EstadoAnalisis.PROCESANDO # Cambiamos a PROCESANDO
     )
     db.add(nuevo_analisis)
-    db.flush() # Genera el ID sin cerrar la transacción
+    db.flush()
 
-    # 2. Guardar el Snapshot
     nuevo_snapshot = SnapshotRecibido(
         analisis_id=nuevo_analisis.id,
         payload_completo=json.dumps(snapshot_in.datos)
     )
     db.add(nuevo_snapshot)
-    
-    # 3. Guardar cambios
     db.commit()
     db.refresh(nuevo_analisis)
 
+    # 2. Preparar el Prompt
+    prompt_builder = PromptBuilder()
+    system_prompt, user_prompt = prompt_builder.construir_instrucciones(snapshot_in.dict())
+
+    # 3. Llamar a la IA (OpenRouter)
+    llm_client = LLMClient()
+    respuesta_ia = await llm_client.enviar_prompt(system_prompt, user_prompt)
+
+    # 4. Actualizar estado final en la DB
+    try:
+        # Aquí deberías parsear la respuesta_ia para ver si fue exitosa
+        nuevo_analisis.estado = EstadoAnalisis.COMPLETADO
+    except Exception:
+        nuevo_analisis.estado = EstadoAnalisis.ERROR
+    
+    db.commit()
+
     return {
-        "mensaje": "Analisis iniciado correctamente",
         "analisis_id": str(nuevo_analisis.id),
-        "estado": nuevo_analisis.estado
+        "estado": nuevo_analisis.estado,
+        "analisis_ia": respuesta_ia # Devolvemos la respuesta cruda de la IA
     }
 
 @app.get("/")
