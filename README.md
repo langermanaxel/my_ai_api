@@ -6,24 +6,28 @@ API profesional diseñada para la auditoría y análisis de datos de obras civil
 
 ## 📸 Arquitectura del Sistema
 
-La API sigue un patrón de **Persistencia en Cascada** y **Auditoría de IA**, asegurando que ningún dato se pierda incluso si el proveedor de IA falla.
+La API sigue un patrón de **Persistencia en Cascada** y **Auditoría de IA**, asegurando que ningún dato se pierda y que cada interacción con el LLM sea trazable.
 
 
 
 ---
 
-## 🚀 Hitos del Proyecto
+## 🚀 Hitos y Capacidades
 
-### 1. Normalización de Datos (Paso 2)
-A diferencia de un sistema simple, esta API desacopla el **Análisis** de la **Foto de la Obra (Snapshot)**.
-* **Snapshots**: Cada entrada de datos se guarda íntegramente.
-* **Tablas Estructuradas**: Proyecto, Etapas, Avances y Seguridad se mapean automáticamente a columnas SQL para permitir reportes de Business Intelligence (BI).
+### 1. Seguridad y Usuarios
+* **Hashing de Contraseñas**: Integración de `Passlib` con `Bcrypt` (v4.0.1) para proteger las credenciales.
+* **Validación Rigurosa**: Uso de `EmailStr` de Pydantic para garantizar datos de contacto reales.
+* **Arquitectura de Autenticación**: Sistema preparado para la implementación de JWT.
 
-### 2. Auditoría LLM Pro (Paso 3)
-Sistema de trazabilidad total para el control de calidad y costos:
+### 2. Auditoría LLM Pro
 * **Track de Tokens**: Registro de consumo de entrada y salida por cada análisis.
-* **Latencia**: Medición en milisegundos de la respuesta de la IA.
-* **Logs de Prompts**: Almacenamiento del `System` y `User` prompt para depuración técnica.
+* **Métricas de Rendimiento**: Medición de latencia y registro del modelo específico utilizado (OpenRouter).
+* **Logs de Prompts**: Almacenamiento del contexto enviado a la IA para depuración técnica y mejora de prompts.
+
+### 3. Infraestructura Profesional
+* **Configuración Centralizada**: Gestión mediante `Pydantic Settings` para un manejo seguro de API Keys.
+* **Docker Ready**: Incluye `Dockerfile` optimizado y `.dockerignore` para despliegues rápidos.
+* **Estandard de Empaquetado**: Uso de `pyproject.toml` con soporte para herramientas de linting como `Ruff` y `Black`.
 
 ---
 
@@ -31,9 +35,9 @@ Sistema de trazabilidad total para el control de calidad y costos:
 
 * **Backend**: FastAPI (Python 3.12+)
 * **Base de Datos**: PostgreSQL
-* **ORM**: SQLAlchemy 2.0 (con soporte para tipos UUID y JSON)
-* **IA**: Integración con modelos GPT vía `LLMClient`
-* **Logging**: Estándar profesional con trazabilidad de errores
+* **ORM**: SQLAlchemy 2.0 (UUIDs y tipos JSON nativos)
+* **IA**: Integración con OpenRouter (GPT-4, Claude, Llama 3)
+* **Contenerización**: Docker (Python 3.12-slim)
 
 ---
 
@@ -41,100 +45,47 @@ Sistema de trazabilidad total para el control de calidad y costos:
 
 ```text
 .
-├── app
-│   ├── db/              # Configuración de Engine y SessionLocal
-│   ├── models/          # Modelos de SQLAlchemy (analisis.py)
-│   ├── schemas/         # Validaciones de Pydantic (snapshot.py)
-│   ├── services/        # Lógica de LLM, PromptBuilder y Webhooks
-│   └── main.py          # Orquestador y Endpoints de la API
-├── requirements.txt     # Dependencias del proyecto
-└── README.md            # Documentación
-
-Gemini said
-Aquí tienes el código completo en formato Markdown listo para que lo copies y lo pegues en tu archivo README.md. He estructurado la información para que se vea profesional en GitHub o cualquier plataforma de Git.
-
-Markdown
-# 🏗️ AI Construction Analysis API
-
-API profesional diseñada para la auditoría y análisis de datos de obras civiles mediante Inteligencia Artificial. El sistema transforma reportes de obra crudos en información estructurada y accionable, detectando riesgos de seguridad y desviaciones de cronograma.
-
----
-
-## 📸 Arquitectura del Sistema
-
-La API sigue un patrón de **Persistencia en Cascada** y **Auditoría de IA**, asegurando que ningún dato se pierda incluso si el proveedor de IA falla.
-
-
-
----
-
-## 🚀 Hitos del Proyecto
-
-### 1. Normalización de Datos (Paso 2)
-A diferencia de un sistema simple, esta API desacopla el **Análisis** de la **Foto de la Obra (Snapshot)**.
-* **Snapshots**: Cada entrada de datos se guarda íntegramente.
-* **Tablas Estructuradas**: Proyecto, Etapas, Avances y Seguridad se mapean automáticamente a columnas SQL para permitir reportes de Business Intelligence (BI).
-
-### 2. Auditoría LLM Pro (Paso 3)
-Sistema de trazabilidad total para el control de calidad y costos:
-* **Track de Tokens**: Registro de consumo de entrada y salida por cada análisis.
-* **Latencia**: Medición en milisegundos de la respuesta de la IA.
-* **Logs de Prompts**: Almacenamiento del `System` y `User` prompt para depuración técnica.
-
----
-
-## 🛠️ Stack Tecnológico
-
-* **Backend**: FastAPI (Python 3.12+)
-* **Base de Datos**: PostgreSQL
-* **ORM**: SQLAlchemy 2.0 (con soporte para tipos UUID y JSON)
-* **IA**: Integración con modelos GPT vía `LLMClient`
-* **Logging**: Estándar profesional con trazabilidad de errores
-
----
-
-## 📂 Estructura de Archivos
-
-```text
-.
-├── app
-│   ├── db/              # Configuración de Engine y SessionLocal
-│   ├── models/          # Modelos de SQLAlchemy (analisis.py)
-│   ├── schemas/         # Validaciones de Pydantic (snapshot.py)
-│   ├── services/        # Lógica de LLM, PromptBuilder y Webhooks
-│   └── main.py          # Orquestador y Endpoints de la API
-├── requirements.txt     # Dependencias del proyecto
-└── README.md            # Documentación
+├── app/
+│   ├── api/v1/endpoints/  # Rutas de la API (analisis, usuarios)
+│   ├── core/              # Configuración (config.py) y Seguridad
+│   ├── db/                # Sesión y motor de base de datos
+│   ├── models/            # Modelos SQLAlchemy (analisis.py, user.py)
+│   ├── schemas/           # Validaciones Pydantic (snapshot.py, user.py)
+│   ├── services/          # Cliente LLM y PromptBuilder
+│   └── main.py            # Punto de entrada de la aplicación
+├── Dockerfile             # Definición de la imagen del contenedor
+├── pyproject.toml         # Metadatos y dependencias del proyecto
+├── .env.example           # Plantilla de variables de entorno
+└── README.md              # Esta documentación
 ⚙️ Instalación y Ejecución
-Activar Entorno Virtual:
+1. Configuración Inicial
+Copia el archivo de ejemplo y completa tus credenciales:
 
 Bash
-source venv/bin/activate
-Instalar Dependencias:
-
+cp .env.example .env
+2. Instalación (Modo Editable)
 Bash
-pip install -r requirements.txt
-Ejecutar en Desarrollo:
-
+pip install -e .
+3. Ejecutar con Uvicorn
 Bash
 uvicorn app.main:app --reload
 📍 Endpoints Principales
-📥 Iniciar Análisis (POST /analisis/iniciar)
-Recibe el JSON de la obra, persiste los datos estructurados y dispara la IA.
+POST /auth/register: Registra un nuevo auditor en el sistema.
 
-🔍 Detalle de Auditoría (GET /analisis/detalle/{id})
-Devuelve la radiografía completa del proceso:
+POST /analisis/iniciar: Envía un snapshot de obra, lo persiste y ejecuta el análisis de IA.
 
-Datos originales del proyecto.
+GET /analisis/detalle/{id}: Devuelve la radiografía completa (datos originales + reporte de IA + métricas de auditoría).
 
-Resultado de la IA (Score de coherencia, riesgos detectados).
+POST /analisis/reset-db: (Dev) Limpia y recrea las tablas de la base de datos.
 
-Métricas de auditoría (Tokens usados, modelo, tiempo).
+Desarrollado con enfoque en escalabilidad, seguridad y auditoría de IA.
 
-🛠️ Mantenimiento (POST /mantenimiento/reset-db)
-Endpoint utilitario para limpiar y recrear el esquema de base de datos durante el desarrollo.
 
-📊 Modelo de Datos (Snowflake Schema)
-El sistema utiliza relaciones de clave foránea (FK) vinculadas al snapshot_id, lo que permite mantener un histórico de cómo evolucionó un proyecto a través de diferentes reportes.
+---
 
-Desarrollado con enfoque en escalabilidad y auditoría de IA.
+### ¿Cómo guardarlo rápido desde la terminal?
+Si quieres hacerlo sin abrir el editor, puedes usar este comando:
+```bash
+cat <<EOF > README.md
+(Pega aquí todo el contenido de arriba)
+EOF
