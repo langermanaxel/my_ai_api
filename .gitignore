@@ -1,0 +1,127 @@
+# --- Entornos Virtuales (¡Muy importante!) ---
+venv/
+.venv/
+env/
+.env/
+ENV/
+.ENV/
+env.bak/
+venv.bak/
+
+# --- uv package manager ---
+.uv-cache/
+
+# --- Archivos compilados de Python ---
+*.pyc
+*.pyo
+*.pyc
+*.pyd
+__pycache__/
+
+# --- Archivos de entorno y secretos (¡Seguridad!) ---
+# Ignoramos todos los .env excepto .env.example
+.env
+.env.*
+!.env.example
+.env.local
+.env.production
+.env.production.local
+.env.test
+.env.test.local
+secrets.json
+.secret_key
+*.pem
+*.key
+*.crt
+
+# --- IDEs y Editores ---
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+.history/
+
+# --- Archivos del Sistema Operativo ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.desktop.ini
+
+# --- Logs y archivos de ejecución ---
+*.log
+*.out
+*.bin
+logs/
+
+# --- Bases de datos ---
+# Si usas PostgreSQL con Docker, estos suelen no ser necesarios,
+# pero se mantienen por seguridad.
+*.db
+*.sqlite3
+*.sqlite
+
+# --- Archivos de bloqueo de dependencias ---
+Pipfile.lock
+poetry.lock
+uv.lock
+
+# --- Caché y archivos temporales ---
+.cache/
+.pytest_cache/
+.mypy_cache/
+.hypothesis/
+.tox/
+.ruff_cache/
+*.tmp
+*.temp
+*.pid
+*.seed
+*.pid.lock
+
+# --- Archivos estáticos y media (para frameworks web) ---
+staticfiles/
+media/
+uploads/
+
+# --- Node.js (por si acaso usas frontend) ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Testing ---
+.coverage
+.coverage.*
+htmlcov/
+test-results/
+coverage.xml
+
+# --- Build y Distribución ---
+build/
+dist/
+*.egg-info/
+*.whl
+*.tar.gz
+
+# --- Otros ---
+.ipynb_checkpoints
+.python-version
+__pypackages__/
+celerybeat-schedule
+celerybeat.pid
+*.sage.py
+.spyderproject
+.spyproject
+.ropeproject
+/site
+*.bak
+*.backup
+*.old
