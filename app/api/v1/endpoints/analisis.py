@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from datetime import datetime
 
-from app.db.base import get_db, Base, engine
+from app.api.dependencies import get_db
+from app.db.base import Base, engine # Solo para el reset-db
 from app.models.analisis import (
     Analisis, SnapshotRecibido, EstadoAnalisis, 
     ResultadoAnalisis, ObservacionGenerada, 
@@ -14,7 +15,9 @@ from app.schemas.snapshot import SnapshotCreate
 from app.services.llm_client import LLMClient
 from app.services.prompt_builder import PromptBuilder
 from app.services.webhook_client import WebhookClient
-from app.utils.logger import logger
+import logging # Usamos el logging estándar configurado en core
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 

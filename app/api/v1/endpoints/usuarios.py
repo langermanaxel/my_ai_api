@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.db.base import get_db
+from app.api.dependencies import get_db # Inyección centralizada
 from app.models.analisis import User
 from app.schemas.user import UserCreate, UserOut
-from app.core.security import get_password_hash # La que creamos con passlib
+from app.core.security import get_password_hash
 
 router = APIRouter()
 

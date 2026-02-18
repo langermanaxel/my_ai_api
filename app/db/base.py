@@ -1,20 +1,18 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
+from app.config.settings import settings
 
-# URL de conexión (coincide con el docker-compose)
-# Estructura: postgresql://usuario:password@host:puerto/nombre_db
-SQLALCHEMY_DATABASE_URL = "postgresql://admin:admin123@localhost:5432/ai_analisis_db"
+# 1. Usamos la URL desde los settings (centralizado y seguro)
+SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
 
+# 2. Configuración del Engine
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
+
+# 3. Sesión local
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# 4. Base para los modelos
 Base = declarative_base()
 
-# Dependencia para obtener la DB en cada request
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# NOTA: La función get_db() se ha movido a app/api/dependencies.py 
+# para seguir el estándar de organización granular del template.

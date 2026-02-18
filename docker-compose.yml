@@ -1,18 +1,46 @@
-version: '3.8'
-
 services:
   db:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: ai_postgres_db
     restart: always
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
-      POSTGRES_DB: ai_analisis_db
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
+      POSTGRES_DB: ${POSTGRES_DB:-ai_analisis_db}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # Este comando verifica que Postgres acepte conexiones antes de marcarlo como 'healthy'
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-ai_analisis_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ai_network
+
+  api:
+    build: .
+    container_name: ai_fastapi_app
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      # Usamos el nombre del servicio 'db' en lugar de localhost
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-admin}:${POSTGRES_PASSWORD:-admin123}@db:5432/${POSTGRES_DB:-ai_analisis_db}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy # <--- CRÍTICO: Espera al healthcheck de arriba
+    env_file:
+      - .env
+    networks:
+      - ai_network
+
+networks:
+  ai_network:
+    driver: bridge
 
 volumes:
   postgres_data:
